@@ -21,7 +21,8 @@ const steps = [
 
 const Wizard: React.FC = () => {
     const { step, xp, badges } = useGamification();
-    const CurrentStep = steps[step] || steps[steps.length - 1];
+    console.log('🧙 Wizard State:', { step, xp, badges });
+    const CurrentStep = (steps[step] || steps[steps.length - 1]) as React.FC;
 
     return (
         <div className="max-w-4xl mx-auto p-6 min-h-screen flex flex-col">

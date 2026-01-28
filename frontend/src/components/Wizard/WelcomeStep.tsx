@@ -6,8 +6,10 @@ const WelcomeStep: React.FC = () => {
     const { nextStep, addXP, addBadge } = useGamification();
 
     const handleStart = () => {
+        console.log('🚀 handleStart clicked');
         addXP(100);
         addBadge('Wallet Warrior 🛡️');
+        console.log('🔄 Calling nextStep...');
         nextStep();
     };
 

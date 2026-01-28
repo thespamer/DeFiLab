@@ -16,6 +16,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_RPC_URL=http://localhost:8545
+        - VITE_CHAIN_ID=31337
     ports:
       - "3000:80"
     volumes:

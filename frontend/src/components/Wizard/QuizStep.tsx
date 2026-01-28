@@ -21,7 +21,8 @@ const QuizStep: React.FC = () => {
     const [selected, setSelected] = useState<number | null>(null);
 
     const handleNext = () => {
-        if (selected === questions[currentQ].correct) {
+        const question = questions[currentQ];
+        if (question && selected === question.correct) {
             addXP(50);
         }
 
@@ -42,9 +43,9 @@ const QuizStep: React.FC = () => {
             </div>
 
             <div className="bg-card border rounded-2xl p-8 shadow-sm">
-                <h3 className="text-xl font-semibold mb-6">{questions[currentQ].q}</h3>
+                <h3 className="text-xl font-semibold mb-6">{questions[currentQ]?.q}</h3>
                 <div className="space-y-3">
-                    {questions[currentQ].options.map((opt, idx) => (
+                    {questions[currentQ]?.options.map((opt, idx) => (
                         <button
                             key={idx}
                             onClick={() => setSelected(idx)}

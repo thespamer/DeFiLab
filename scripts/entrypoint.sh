@@ -11,7 +11,7 @@ until nc -z localhost 8545; do
 done
 
 echo "Node started! Running initial DeFi deployment..."
-npx hardhat run scripts/deploy.cjs --network localhost
+npx hardhat run scripts/deploy.js --network localhost
 
 # Keep the container running by waiting for the node process
 wait $NODE_PID
