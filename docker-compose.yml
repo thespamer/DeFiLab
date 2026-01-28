@@ -9,6 +9,7 @@ services:
       - "8545:8545"
     volumes:
       - .:/app
+    restart: always
     # Entrypoint handles start + deploy
 
   frontend:
@@ -16,7 +17,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./frontend:/app
       - /app/node_modules

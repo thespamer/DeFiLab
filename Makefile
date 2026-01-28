@@ -14,7 +14,7 @@ reset: down up
 
 # Hardhat commands (run inside container or locally)
 deploy:
-	npx hardhat run scripts/deploy.js --network localhost
+	npx hardhat run scripts/deploy.cjs --network localhost
 
 test:
 	npx hardhat test
