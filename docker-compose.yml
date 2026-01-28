@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  hardhat:
+    build:
+      context: .
+      dockerfile: Dockerfile.hardhat
+    ports:
+      - "8545:8545"
+    volumes:
+      - .:/app
+    # Entrypoint handles start + deploy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_RPC_URL=http://localhost:8545
+      - VITE_CHAIN_ID=31337
+    depends_on:
+      - hardhat
