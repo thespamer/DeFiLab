@@ -40,8 +40,8 @@ The Wizard is an interactive 7-step journey covering the fundamentals of the DeF
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/thespamer/defi-ethereum-discovery-wizard.git
-   cd defi-ethereum-discovery-wizard
+   git clone https://github.com/thespamer/DeFiLab.git
+   cd DeFiLab
    ```
 
 2. **Environment Configuration**:
