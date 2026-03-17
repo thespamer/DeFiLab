@@ -9,18 +9,20 @@ services:
       - "8545:8545"
     volumes:
       - .:/app
-    restart: always
-    # Entrypoint handles start + deploy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8545"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        - VITE_RPC_URL=http://localhost:8545
-        - VITE_CHAIN_ID=31337
     ports:
-      - "3000:80"
+      - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -28,4 +30,5 @@ services:
       - VITE_RPC_URL=http://localhost:8545
       - VITE_CHAIN_ID=31337
     depends_on:
-      - hardhat
+      hardhat:
+        condition: service_healthy
