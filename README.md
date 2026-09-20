@@ -2,149 +2,207 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)](https://www.docker.com/)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.26-blue.svg)](https://docs.soliditylang.org/)
+[![Tests](https://img.shields.io/badge/Tests-15%20passing-brightgreen.svg)](#-running-tests)
 
 Become a DeFi pro from a beginner in 15 minutes with our interactive and gamified Ethereum discovery guide.
 
 ---
 
-## 🎮 The Wizard Challenge
+## 🎮 The Wizard — 8 Steps
 
-The Wizard is an interactive 8-step journey covering the fundamentals of the DeFi ecosystem:
-
-1.  **Welcome**: Connect MetaMask to the Hardhat devnet and claim 1000 USDC + 1000 DAI from the faucet.
-2.  **DeFi 101**: Master the core differences between CeFi and DeFi through interactive quizzes.
-3.  **Your Arsenal**: Explore essential protocols and concepts (Gas, DEX, Lending).
-4.  **Contract Tests**: Automated in-browser test suite that runs 6 live transactions against the devnet to verify every contract before you use them.
-5.  **First Lending**: Real `approve()` + `deposit()` + `borrow()` calls on SimpleLendingPool.
-6.  **DEX Swap**: Live AMM quote via `getAmountOut()` + real `swap()` on BasicDEX.
-7.  **Yield Combo**: Real `stake()` + `claimReward()` on StakingRewards.
-8.  **Playground Pro**: Live on-chain balances, full real transaction history, and badges.
+| # | Step | What happens on-chain |
+|---|---|---|
+| 1 | **Welcome** | MetaMask connects to Hardhat devnet; `requestTokens()` faucet gives 1000 USDC + 1000 DAI |
+| 2 | **DeFi 101** | Interactive quiz — no transaction |
+| 3 | **Your Arsenal** | Concept cards — no transaction |
+| 4 | **Contract Tests** | Automated browser-side test suite: 6 live transactions against devnet using Hardhat account #2 |
+| 5 | **First Lending** | `approve()` + `deposit()` USDC; then `borrow()` against 50% LTV on `SimpleLendingPool` |
+| 6 | **DEX Swap** | Live `getAmountOut()` quote + `approve()` + `swap()` on `BasicDEX` (x·y=k AMM) |
+| 7 | **Yield Combo** | `deposit()` + `swap()` + `stake()` on `StakingRewards`, then `claimReward()` |
+| 8 | **Playground Pro** | Live on-chain balances, real transaction history, all earned badges |
 
 ---
 
-## 🏗️ Technical Architecture
+## 🏗️ Architecture
 
-- **Blockchain**: Local Hardhat Devnet (localhost:8545, chainId 31337).
-- **Smart Contracts**: Solidity 0.8.24 + OpenZeppelin 5.x.
-- **Frontend**: React 19, Vite 6 (dev mode), Tailwind CSS, shadcn/ui, Framer Motion.
-- **Web3 Engine**: ethers.js 6 + MetaMask browser wallet.
-- **Infrastructure**: Docker & Docker Compose — Vite dev server + Hardhat node.
+| Layer | Stack |
+|---|---|
+| Blockchain | Hardhat devnet — localhost:8545, chainId 31337 |
+| Smart contracts | Solidity **0.8.26** + OpenZeppelin 5.x |
+| Frontend | React 19, Vite 6 (dev server), Tailwind CSS, shadcn/ui, Framer Motion |
+| Web3 | **ethers.js 6** + MetaMask browser wallet |
+| Infrastructure | Docker Compose — Hardhat node + Vite dev server |
+
+### Contracts deployed
+
+| Contract | Role |
+|---|---|
+| `WizardFactory` | Deploys and wires all contracts; `requestTokens()` faucet |
+| `ERC20Mock` | Mock USDC and DAI tokens with unrestricted `mint()` |
+| `SimpleLendingPool` | Deposit USDC as collateral, borrow up to 50% LTV |
+| `BasicDEX` | Constant-product AMM (x·y=k) USDC ↔ DAI |
+| `StakingRewards` | Time-based staking rewards on USDC |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Docker & Docker Compose installed.
-- [MetaMask](https://metamask.io/) browser extension installed.
 
-### Setup & Launch
+- **Docker & Docker Compose**
+- **MetaMask** browser extension — [install here](https://metamask.io/)
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/thespamer/DeFiLab.git
-   cd DeFiLab
-   ```
+### One-command start
 
-2. **Environment Configuration**:
-   ```bash
-   cp .env.example .env
-   ```
+```bash
+git clone https://github.com/thespamer/DeFiLab.git
+cd DeFiLab
+cp .env.example .env
+docker-compose up --build
+```
 
-3. **Start the devnet + frontend**:
-   ```bash
-   docker-compose up --build
-   ```
-   The Hardhat node starts first, deploys all contracts, writes
-   `frontend/public/deployments.json`, then the Vite dev server comes up.
+1. Open **http://localhost:3000**
+2. Click **Connect MetaMask & Begin**
+3. The wizard automatically adds the Hardhat network to MetaMask and funds your wallet
 
-4. **Access the Interface**:
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-5. **Connect MetaMask**:
-   Click **Connect MetaMask & Begin** — the wizard automatically adds the
-   Hardhat network (`chainId 31337`, RPC `http://localhost:8545`) to MetaMask
-   and calls the faucet to fund your wallet with 1000 USDC + 1000 DAI.
+> The Hardhat service starts first, deploys all contracts, and writes
+> `frontend/public/deployments.json` with every contract address.
+> The frontend waits for the healthcheck before starting.
 
 ---
 
-## 🛠️ Development Commands
+## 🛠️ Commands
 
-### Docker (recommended)
+### Docker
 
-| Command | Description |
-|---|---|
-| `docker-compose up --build` | Build images and start devnet + frontend |
-| `docker-compose up` | Start with cached images |
-| `docker-compose down` | Stop all containers |
-| `docker-compose logs -f hardhat` | Watch Hardhat node logs |
-| `docker-compose logs -f frontend` | Watch Vite dev server logs |
-
-### Without Docker (local dev)
-
-**Start the Hardhat devnet:**
 ```bash
-npm run node
-# Starts hardhat node on http://localhost:8545 with 20 funded accounts
+# Build images and start everything
+docker-compose up --build
+
+# Start with cached images (no rebuild)
+docker-compose up
+
+# Stop all containers
+docker-compose down
+
+# Tail logs
+docker-compose logs -f hardhat
+docker-compose logs -f frontend
 ```
 
-**Deploy contracts to the local devnet:**
-```bash
-npm run deploy
-# Deploys all contracts and writes frontend/public/deployments.json
-```
+### Local development (no Docker)
 
-**Run the Solidity test suite:**
-```bash
-npm test
-# Runs test/DeFiWizard.test.cjs with Hardhat + Chai
-# Covers: ERC20Mock, WizardFactory, SimpleLendingPool, BasicDEX, StakingRewards
-```
+**Requires Node.js ≥ 20**
 
-**Start the frontend dev server:**
 ```bash
-cd frontend
+# Install root dependencies
 npm install
-npm run dev
-# Available at http://localhost:3000
+
+# Seed the Solidity compiler cache (only needed once, or in restricted networks)
+node scripts/seed-solc.cjs
+
+# Start the Hardhat devnet (keeps running)
+npm run node
+
+# In a second terminal — deploy contracts + write deployments.json
+npm run deploy
+
+# Start the Vite frontend dev server
+cd frontend && npm install && npm run dev
+# → http://localhost:3000
 ```
 
-### Smart contract shortcuts
+### Hardhat shortcuts
 
 ```bash
-# Compile contracts
+# Compile Solidity contracts
 npx hardhat compile
 
-# Run a single test file
+# Run the full test suite (15 tests)
+npm test
+
+# Run a specific test file
 npx hardhat test test/DeFiWizard.test.cjs
 
-# Open Hardhat console connected to a running node
+# Open an interactive console connected to a running node
 npx hardhat console --network localhost
 
-# Check gas usage per test
+# Gas usage report
 REPORT_GAS=true npx hardhat test
 ```
 
 ---
 
-## 🎖️ Gamification System
+## 🧪 Running Tests
 
-Earn XP and badges as you complete real on-chain actions:
+```bash
+npm test
+```
 
-| Badge | How to earn | XP |
+```
+  DeFi Wizard Contracts
+    ERC20Mock
+      ✔ mint() adds tokens to recipient
+    WizardFactory
+      ✔ deploys all four contracts
+      ✔ requestTokens() mints 1000 USDC + 1000 DAI
+    SimpleLendingPool
+      ✔ deposit() records collateral
+      ✔ borrow() up to 50% LTV succeeds
+      ✔ borrow() over 50% LTV reverts
+      ✔ withdraw() restores tokens
+    BasicDEX
+      ✔ factory seeded initial liquidity
+      ✔ getAmountOut() returns a positive quote
+      ✔ swap() USDC → DAI transfers DAI to user
+      ✔ swap() DAI → USDC transfers USDC to user
+    StakingRewards
+      ✔ stake() records staked amount
+      ✔ earned() accrues rewards over time
+      ✔ withdraw() returns staked tokens
+      ✔ claimReward() transfers earned rewards
+
+  15 passing (1s)
+```
+
+---
+
+## 🔧 Compiler Bootstrap
+
+The project uses **Solidity 0.8.26**, which matches the `soljson.js` bundled inside
+`node_modules/solc`. In environments where `binaries.soliditylang.org` is
+unreachable (air-gapped CI, corporate proxies, remote sandboxes), run:
+
+```bash
+node scripts/seed-solc.cjs
+```
+
+This script:
+1. Copies `node_modules/solc/soljson.js` to Hardhat's local compiler cache
+2. Patches the Hardhat downloader to use the WASM (JS) build on Linux instead of trying to spawn a native binary
+
+The `Dockerfile.hardhat` already runs this automatically during `docker build`,
+so container users don't need to do anything extra.
+
+---
+
+## 🎖️ Gamification
+
+| Badge | Trigger | XP |
 |---|---|---|
-| 🛡️ Wallet Warrior | Connect MetaMask + claim faucet | 100 |
-| 📚 Scholar | Complete the DeFi 101 quiz | 50–100 |
-| 🗺️ Explorer | Read all Arsenal concept cards | 50 |
-| 🧪 Test Engineer | Run the contract test suite | 150 |
+| 🛡️ Wallet Warrior | Connect MetaMask + faucet | 100 |
+| 📚 Scholar | DeFi 101 quiz | 50–100 |
+| 🗺️ Explorer | Read Arsenal cards | 50 |
+| 🧪 Test Engineer | Run contract test suite | 150 |
 | 💧 Liquidity Provider | `deposit()` USDC in LendingPool | 100 |
 | 💸 Borrower | `borrow()` against collateral | 150 |
 | 🔄 Swapper | `swap()` USDC → DAI on BasicDEX | 100 |
 | 🌾 Yielder Pro | `stake()` + `claimReward()` on StakingRewards | 150 |
-| 🧙‍♂️ DeFi Wizard | Complete all steps | — |
+| 🧙‍♂️ DeFi Wizard | Complete all 8 steps | — |
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License.
 
+MIT

@@ -9,23 +9,28 @@ type Status = 'idle' | 'connecting' | 'faucet' | 'done';
 const WelcomeStep: React.FC = () => {
     const { nextStep, addXP, addBadge } = useGamification();
     const { connect, account, isConnecting, contracts, addTx, error } = useWeb3();
-    const [status, setStatus]       = useState<Status>('idle');
-    const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
-    const [faucetError, setFaucetError] = useState<string | null>(null);
 
-    // Once the wallet is connected and contracts are loaded, request faucet tokens
+    const [status,       setStatus]       = useState<Status>('idle');
+    const [usdcBalance,  setUsdcBalance]  = useState<string | null>(null);
+    const [faucetError,  setFaucetError]  = useState<string | null>(null);
+
+    // Advance from 'connecting' once the Web3 context has resolved.
+    // Runs whenever account/contracts/error change WHILE we are in 'connecting'.
+    // Fixes a stale-closure bug: checking `account` inline after `await connect()`
+    // always reads the pre-connect (falsy) snapshot, so we rely on this effect
+    // to react to the real state change instead.
     useEffect(() => {
-        if (account && contracts && status === 'connecting') {
-            requestFaucet();
-        }
-    }, [account, contracts]);
+        if (status !== 'connecting') return;
+        if (error) { setStatus('idle'); return; }         // connect failed
+        if (account && contracts) { requestFaucet(); }    // connect succeeded
+    }, [account, contracts, error, status]);              // status in deps: required
 
     const handleConnect = async () => {
         setStatus('connecting');
         setFaucetError(null);
         await connect();
-        // If connect() failed the error is in the Web3 context; reset status so user can retry
-        if (!account) setStatus('idle');
+        // Do NOT read `account` here — it is the stale pre-connect value.
+        // The useEffect above handles all advancement of `status`.
     };
 
     const requestFaucet = async () => {
@@ -70,14 +75,14 @@ const WelcomeStep: React.FC = () => {
                 </div>
             )}
 
-            {/* Faucet error (non-blocking) */}
+            {/* Faucet error (non-blocking — user can still continue) */}
             {faucetError && (
                 <div className="text-yellow-600 text-sm bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-xl max-w-md mx-auto">
                     ⚠️ Faucet: {faucetError}
                 </div>
             )}
 
-            {/* Connected account status */}
+            {/* Connected account banner */}
             {account && (
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-xl p-4 max-w-md mx-auto space-y-2">
                     <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 font-mono text-sm">
@@ -98,7 +103,7 @@ const WelcomeStep: React.FC = () => {
                 </div>
             )}
 
-            {/* Action buttons */}
+            {/* CTA buttons */}
             <div className="pt-8">
                 {status === 'idle' && (
                     <button
@@ -127,7 +132,7 @@ const WelcomeStep: React.FC = () => {
             </div>
 
             <p className="text-xs text-muted-foreground mt-4">
-                Network: Hardhat Local Devnet (chainId 31337) · RPC: http://localhost:8545
+                Network: Hardhat Local Devnet · chainId 31337 · RPC http://localhost:8545
             </p>
         </div>
     );

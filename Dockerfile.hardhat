@@ -2,13 +2,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install netcat for healthchecks in entrypoint
+# netcat used by entrypoint healthcheck
 RUN apk add --no-cache netcat-openbsd
 
 COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Seed the Hardhat WASM compiler cache from the soljson.js that ships with
+# the `solc` npm package. This bakes the Solidity compiler into the image so
+# the container never needs to reach binaries.soliditylang.org at runtime.
+RUN node scripts/seed-solc.cjs
+
+# Pre-compile all Solidity contracts at image-build time so startup is instant.
+RUN npx hardhat compile
 
 RUN chmod +x scripts/entrypoint.sh
 
